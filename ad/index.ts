@@ -3,7 +3,12 @@ import bodyParser from 'body-parser';
 import jwt from 'jsonwebtoken';
 import { createConnection } from 'typeorm';
 import { Product } from './entity/ProductReview';
-import { ProductController } from './controller/ProductController';
+import { ProductControllerCreate } from './controller/ProductControllerCreation';
+import { DeleteProductController } from './controller/DeleteProductController';
+import { ProductControllerReview } from './controller/ProductControllerCreation';
+import { ProductControllerReviews } from './controller/ProductControllerCreation';
+import { UpdateProductController } from './controller/UpdateProductController';
+
 
 const app = express();
 
@@ -13,7 +18,12 @@ createConnection().then(async connection => {
 
   const productRepository = connection.getRepository(Product);
 
-  const productController = new ProductController(productRepository);
+  const productControllerCreate = new ProductControllerCreate(productRepository);
+  const deleteProductController = new DeleteProductController(productRepository);
+  const productControllerReview = new ProductControllerReview(productRepository);
+  const productControllerReviews = new ProductControllerReviews(productRepository);
+  const updateProductController = new UpdateController(productRepository);
+  
 
   // Create a new product review
   app.post('/review', async (req, res) => {
@@ -30,7 +40,7 @@ createConnection().then(async connection => {
 		  return res.status(401).send({ error: 'Unauthorized' });
 		}
 	  
-		productController.createProductReview(req, res, user));
+		productControllerCreate.createProductReview(req, res, user));
 
 	  } catch (e) {
 		console.error(e);
@@ -39,16 +49,19 @@ createConnection().then(async connection => {
   });	
 
   // Get all product reviews
-  app.get('/review', (req, res) => productController.getProductReviews(req, res));
+  app.get('/review', (req, res) => productControllerReview.getProductReviews(req, res));
 
   // Get a single product review
-  app.get('/review/:id', (req, res) => productController.getProductReview(req, res));
+  app.get('/reviews/:id', (req, res) => productControllerReviews.getProductReview(req, res));
 
   // Update a product review
-  app.put('/review/:id', (req, res) => productController.updateProductReview(req, res));
+  app.put('/review/:id', (req, res) => updateProductController.updateProductReview(req, res));
 
   // Delete a product review
-  app.delete('/review/:id', (req, res) => productController.deleteProductReview(req, res));
+  app.delete('/review/:id', (req, res) => deleteProductController.deleteProductReview(req, res));
+  
+  // Get all reviews
+  app.get('/productEvaluation', (req, res) => productController.getProductEvaluation(req, res));
 
   app.listen(3000, () => {
     console.log('Server running on port 3000');
